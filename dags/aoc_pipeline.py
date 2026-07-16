@@ -28,19 +28,12 @@ def aoc_pipeline():
     def list_days(**context) -> list[dict]:
         """Keep only requested days that actually have a solution module.
 
-        Uses importlib to check importability, so it's independent of how the
-        repo is laid out on disk (git-sync checkout, PVC, or installed package).
+        Layout-independent (works under git-sync, PVC, or installed package).
         """
-        import importlib.util
+        from adventofcode.common.discovery import implemented_days
 
         params = context["params"]
-        year = int(params["year"])
-        requested = sorted({int(d) for d in params["days"]})
-        return [
-            {"year": year, "day": day}
-            for day in requested
-            if importlib.util.find_spec(f"adventofcode.y{year}.day{day:02d}.solution") is not None
-        ]
+        return implemented_days(int(params["year"]), params["days"])
 
     @task
     def solve(item: dict) -> dict:
