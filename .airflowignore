@@ -1,0 +1,6 @@
+# DAGS_FOLDER is the repo root (git-sync). Only dags/ holds DAGs; everything
+# below is imported as a package or is tooling — keep the DAG processor from
+# trying to parse it as DAG files. (This does NOT affect importability.)
+^adventofcode/
+^\.github/
+^docs/

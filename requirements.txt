@@ -1,0 +1,3 @@
+# Runtime dependency for the DAG tasks. The Airflow image already ships
+# psycopg2, so this is only needed for running solutions outside the cluster.
+psycopg2-binary>=2.9

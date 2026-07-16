@@ -1,0 +1,35 @@
+name: CI
+
+# Deterministic quality gate on every PR and on pushes to main. This is also the
+# pipeline Gitar (AI code review, installed as a GitHub App) validates its
+# suggested fixes against. Merging to main is the manual promotion gate; Airflow
+# git-syncs main and picks up the change.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dev tooling
+        run: pip install -r requirements-dev.txt
+
+      - name: Ruff (lint)
+        run: ruff check .
+
+      - name: Black (format check)
+        run: black --check .
+
+      - name: Mypy (type check)
+        run: mypy adventofcode dags
+
+      - name: Pytest (unit tests)
+        run: pytest
