@@ -10,13 +10,8 @@ gate. Nothing here needs a self-hosted runner.
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pendulum
 from airflow.decorators import dag, task
-
-# Repo root is one level up from dags/ (git-sync checks out the whole repo).
-REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 @dag(
@@ -31,15 +26,20 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 def aoc_pipeline():
     @task
     def list_days(**context) -> list[dict]:
-        """Keep only requested days that actually have a solution module."""
+        """Keep only requested days that actually have a solution module.
+
+        Uses importlib to check importability, so it's independent of how the
+        repo is laid out on disk (git-sync checkout, PVC, or installed package).
+        """
+        import importlib.util
+
         params = context["params"]
         year = int(params["year"])
         requested = sorted({int(d) for d in params["days"]})
-        year_dir = REPO_ROOT / "adventofcode" / f"y{year}"
         return [
             {"year": year, "day": day}
             for day in requested
-            if (year_dir / f"day{day:02d}" / "solution.py").exists()
+            if importlib.util.find_spec(f"adventofcode.y{year}.day{day:02d}.solution") is not None
         ]
 
     @task
